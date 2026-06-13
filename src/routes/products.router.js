@@ -1,0 +1,68 @@
+const { Router } = require("express");
+const ProductManager = require("../managers/ProductManager");
+
+const router = Router();
+
+const manager = new ProductManager("./src/data/products.json");
+
+router.get("/", async (req, res) => {
+
+    const products = await manager.getProducts();
+
+    res.json(products);
+});
+
+router.get("/:pid", async (req, res) => {
+
+    const id = req.params.pid;
+
+    const product = await manager.getProductById(id);
+
+    if (!product) {
+        return res.status(404).json({
+            error: "Producto no encontrado"
+        });
+    }
+
+    res.json(product);
+});
+
+router.post("/", async (req, res) => {
+
+    const product = req.body;
+
+    const result = await manager.addProduct(product);
+
+    res.status(201).json(result);
+});
+
+router.put("/:pid", async (req, res) => {
+
+    const id = req.params.pid;
+
+    const updatedProduct = await manager.updateProduct(
+        id,
+        req.body
+    );
+
+    if (!updatedProduct) {
+        return res.status(404).json({
+            error: "Producto no encontrado"
+        });
+    }
+
+    res.json(updatedProduct);
+});
+
+router.delete("/:pid", async (req, res) => {
+
+    const id = req.params.pid;
+
+    await manager.deleteProduct(id);
+
+    res.json({
+        message: "Producto eliminado"
+    });
+});
+
+module.exports = router;
